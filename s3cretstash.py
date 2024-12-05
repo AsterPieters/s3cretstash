@@ -1,46 +1,77 @@
 #s3cretstash.py
-import tkinter as tk
-from tkinter import ttk, messagebox
 
-from modules.encryption import encrypt_secret, decrypt_secret
-from modules.authentication import authenticate_user
+from modules.authentication import authenticate
 
-def login():
-    master_secret = master_secret_textbox.get()
-    if not master_secret:
-        messagebox.showwarning("Login Failed", "Please provide your master secret.")
-        return
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel
 
-    else:
-        if authenticate_user(master_secret):
-            pass
-        else:
-            messagebox.showerror("Login Failed", "Wrong master secret.")
-            return
+class S3cretstashWindow(QWidget):
+    def __init__(self):
+        super().__init__()
 
+        self.setWindowTitle('S3cretstash')
+        self.setGeometry(200, 200, 600, 300)
 
-    try:
-        print(master_secret)
-    except Exception as e:
-        messagebox.showerror("Error", f"Encryption failed: {e}")
+        self.layout = QVBoxLayout()
+        self.login_screen()
+
+        self.error_label = None
 
 
+    def login_screen(self):
 
-def login_screen():
-    # Login textbox
-    ttk.Label(root, text="Master Secret:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
-    master_secret_textbox = ttk.Entry(root, show="*", width=40)
-    master_secret_textbox.grid(row=0, column=1, padx=10, pady=5)
+        # Master secret field
+        self.master_secret_field = QLineEdit(self)
+        self.master_secret_field.setEchoMode(QLineEdit.Password)
+        self.master_secret_field.setPlaceholderText("Enter Master Secret")
+        self.layout.addWidget(self.master_secret_field)
 
-    # Login button
-    encrypt_button = ttk.Button(root, text="Login", command=login)
-    encrypt_button.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
+        # Login button
+        self.login_button = QPushButton('Login', self)
+        self.login_button.clicked.connect(self.login)
+        self.layout.addWidget(self.login_button)
 
-# Create the main application window
-root = tk.Tk()
-root.title("S3cretstash")
+        # Set the layout
+        self.setLayout(self.layout)
 
-login_screen()
 
-# Start the main loop
-root.mainloop()
+
+
+    def login(self):
+        if authenticate(self.master_secret_field.text()):
+            self.main_window()
+        else:    
+            self.show_error_message("Master secret is not correct.")
+
+    def show_error_message(self, message):
+        # If an error label already exists, remove it
+        if self.error_label:
+            self.layout.removeWidget(self.error_label)
+            self.error_label.deleteLater()
+
+        # Create and add a new error label
+        self.error_label = QLabel(message, self)
+        self.layout.addWidget(self.error_label)
+
+        self.layout.update()
+
+    def main_window(self):
+
+        # Clear existing layout
+        for i in reversed(range(self.layout.count())):
+            widget = self.layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        # Add new widgets (display authenticated data)
+        label = QLabel('You are authenticated!', self)
+        self.layout.addWidget(label)
+
+        self.layout.update()  # Refresh the layout
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = S3cretstashWindow()
+    window.show()
+    sys.exit(app.exec_())
+
