@@ -17,7 +17,7 @@ class UI(QMainWindow):
         # Set title and geo
         self.setWindowTitle("S3cretstash")
         self.setGeometry(100, 100, 800, 600)
-
+        
         # Run the login screen
         self.login_screen()
  
@@ -121,14 +121,34 @@ class UI(QMainWindow):
         for secret_name in self.secrets:
             
             # Secret box
-            secret_box = QGroupBox("", self)
+            secret_box = QGroupBox(secret_name, self)
             secret_box.setFixedSize(400, 100)
-            secret_box.setStyleSheet("QGroupBox { font-weight: bold; margin: 1px; padding: 1px; }")
+            secret_box.setStyleSheet("""
+                QGroupBox {
+                    border: 1px solid #8f8f91;
+                    border-radius: 5px;
+                    margin-top: 20px; /* Create space for the title inside the box */
+                    background-color: #2e2e2e; /* Box background color */
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin; /* Title relative to content */
+                    subcontrol-position: top left; /* Position at top-left inside the box */
+                    padding: 5px 10px; /* Add padding to the title */
+                    color: white; /* Title text color */
+                    font-weight: bold; /* Make the title bold */
+                    background-color: #3c3c3c; /* Title background */
+                    border-radius: 3px; /* Rounded corners for title */
+                }
+            """)
 
-            # Secret name
-            secret_name_label = QLabel(secret_name)
+            # Set the layout
             secret_box_layout = QVBoxLayout()
-            secret_box_layout.addWidget(secret_name_label)
+ 
+            #secret_box_layout.addStretch()
+
+            # Secret value
+            secret_value = QLabel("*******")
+            secret_box_layout.addWidget(secret_value)
             
             # Secret line
             secret_line = QFrame(self)
@@ -136,23 +156,19 @@ class UI(QMainWindow):
             secret_line.setFrameShadow(QFrame.Sunken)
             secret_box_layout.addWidget(secret_line)
 
-            # Secret value
-            secret_value = QLabel("*******")
-            secret_box_layout.addWidget(secret_value)
-
             # Secret checkbox
             secret_checkbox = QCheckBox("Reveal", self)
             secret_checkbox.setAcceptDrops(True)
             secret_box_layout.addWidget(secret_checkbox)
 
-
+            # Set layout
             secret_box.setLayout(secret_box_layout)
             
+            # Add secret box loayout to main layout
             self.main_layout.addWidget(secret_box)
 
+        # Push the secret boxes up
         self.main_layout.addStretch()
-
-        self.central_widget.setLayout(self.main_layout)
 
     def add_secret_screen(self):
         # Create the central widget
