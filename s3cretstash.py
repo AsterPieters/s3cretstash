@@ -115,13 +115,13 @@ class UI(QMainWindow):
 
     def show_secrets(self):
         # Get the secrets
-        self.secrets = get_secrets()
+        self.secrets = get_secrets(self.user.master_secret)
 
         # Create a groupbox for each secret
-        for secret_name in self.secrets:
+        for secret in self.secrets:
             
             # Secret box
-            secret_box = QGroupBox(secret_name, self)
+            secret_box = QGroupBox(secret['secret_name'], self)
             secret_box.setFixedSize(400, 100)
             secret_box.setStyleSheet("""
                 QGroupBox {
@@ -143,11 +143,9 @@ class UI(QMainWindow):
 
             # Set the layout
             secret_box_layout = QVBoxLayout()
- 
-            #secret_box_layout.addStretch()
 
             # Secret value
-            secret_value = QLabel("*******")
+            secret_value = QLabel(secret['secret_value'])
             secret_box_layout.addWidget(secret_value)
             
             # Secret line
@@ -156,10 +154,10 @@ class UI(QMainWindow):
             secret_line.setFrameShadow(QFrame.Sunken)
             secret_box_layout.addWidget(secret_line)
 
-            # Secret checkbox
-            secret_checkbox = QCheckBox("Reveal", self)
-            secret_checkbox.setAcceptDrops(True)
-            secret_box_layout.addWidget(secret_checkbox)
+            # Reveal button
+            reveal_button = QPushButton("Reveal", self)
+            reveal_button.clicked.connect(partial(self.login, self.login_layout))
+            secret_box_layout.addWidget(reveal_button)
 
             # Set layout
             secret_box.setLayout(secret_box_layout)
@@ -210,4 +208,3 @@ if __name__ == '__main__':
 
     ui.show()
     sys.exit(app.exec_())
-
