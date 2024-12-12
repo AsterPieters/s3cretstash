@@ -3,10 +3,8 @@
 from .logger import s3cretstashlogger
 
 import os
-import io
 from minio import Minio
 from dotenv import load_dotenv
-import pandas as pd
 from io import BytesIO
 
 logger = s3cretstashlogger()

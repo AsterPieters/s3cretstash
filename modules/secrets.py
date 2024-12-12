@@ -1,8 +1,7 @@
 #secrets.py
 
-from .encryption import encrypt_secret
+from .encryption import encrypt_secret, decrypt_secret
 from .miniobucket import MinioBucket
-
 
 import base64
 
@@ -13,9 +12,6 @@ def add_secret(secret_name, secret, user):
     Args:
         secret_name (STR): The name of the secret.
         secret (STR): The secret to be encrypted.
-
-    Returns:
-        idk
     """
 
     # Encrypt the secret
@@ -29,20 +25,12 @@ def add_secret(secret_name, secret, user):
     # Create the object
     bucket.create_object(object_name, secret_data)
 
-
-def get_secrets():
+def list_secrets():
     """
-    Get all secrets from the bucket.
-
-    Args:
-        user: The user object
-
-    Returns:
-        idk yet
+    List all secrets stored.
+    
     """
     decoded_secrets = []
-
-
     bucket = MinioBucket()
 
     # Fetch all objects
@@ -53,10 +41,48 @@ def get_secrets():
 
     # Decode the secret_name
     for secret in secrets:
-        decoded_bytes = base64.b64decode(secret)
-        decoded_secret = decoded_bytes.decode('utf-8')
+        decoded_secret = base64.b64decode(secret).decode('utf-8')
         decoded_secrets.append(decoded_secret)
 
-    return decoded_secrets
+    return decoded_secrets     
 
+def get_secrets(master_secret):
+    """
+    Get all stored secrets and decrypt them.
+
+    Args:
+        master_secret: The master secret.
+
+    Returns:
+        data: 
+    """
+    secrets = []
+    bucket = MinioBucket()
+
+    # Get all objects
+    objects = bucket.list_objects()
+    objects.remove("master_secret")
+
+
+    for object in objects:
+
+        # Decode the object 
+        secret_name = base64.b64decode(object).decode('utf-8')
+
+        # Get the data out of the object
+        secret_data = bucket.get_object(object)
+        
+        # Decrypt the data
+        secret_value = decrypt_secret(master_secret, secret_data)
+
+        # Create dict for secret
+        secret = {
+            "secret_name": secret_name,
+            "secret_value": secret_value
+                }
+
+        # Add dict to list
+        secrets.append(secret)
+
+    return secrets 
     
