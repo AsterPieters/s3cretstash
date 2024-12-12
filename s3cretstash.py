@@ -120,8 +120,11 @@ class UI(QMainWindow):
         # Create a groupbox for each secret
         for secret in self.secrets:
             
+            # Get the secret name
+            secret_name = secret['secret_name']
+
             # Secret box
-            secret_box = QGroupBox(secret['secret_name'], self)
+            secret_box = QGroupBox(secret_name, self)
             secret_box.setFixedSize(400, 100)
             secret_box.setStyleSheet("""
                 QGroupBox {
@@ -145,7 +148,7 @@ class UI(QMainWindow):
             secret_box_layout = QVBoxLayout()
 
             # Secret value
-            secret_value = QLabel(secret['secret_value'])
+            secret_value = QLabel("*****")
             secret_box_layout.addWidget(secret_value)
             
             # Secret line
@@ -156,7 +159,10 @@ class UI(QMainWindow):
 
             # Reveal button
             reveal_button = QPushButton("Reveal", self)
-            reveal_button.clicked.connect(partial(self.login, self.login_layout))
+            reveal_button.clicked.connect(
+                    # This is some fucking magic
+                    lambda _, lbl=secret_value, btn=reveal_button, val=secret['secret_value']: self.toggle_secret(lbl, btn, val)
+                    )
             secret_box_layout.addWidget(reveal_button)
 
             # Set layout
@@ -165,8 +171,23 @@ class UI(QMainWindow):
             # Add secret box loayout to main layout
             self.main_layout.addWidget(secret_box)
 
+
+
         # Push the secret boxes up
         self.main_layout.addStretch()
+    
+    def toggle_secret(self, label, button, value):
+        """
+        Toggle between revealing and hiding the secret.
+        """
+        if button.text() == "Reveal":
+            # Reveal the secret
+            label.setText(value)
+            button.setText("Hide")
+        else:
+            # Hide the secret
+            label.setText("******")
+            button.setText("Reveal")
 
     def add_secret_screen(self):
         # Create the central widget
