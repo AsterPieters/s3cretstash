@@ -105,9 +105,14 @@ class MinioBucket:
         """
         List the objects in the bucket.
         """
+        _objects = []
         try:
             objects = self.client.list_objects(self.bucket_name)
             for obj in objects:
-                print(obj.object_name)
+                _objects.append(obj.object_name)
+
+            logger.info("Fetched all objects.")
+            return _objects
+
         except Exception as e:
             print(f"Error occurred while listing objects in bucket {self.bucket_name}: {e}")
