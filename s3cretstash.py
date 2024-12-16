@@ -86,43 +86,41 @@ class UI(QMainWindow):
         layout.update()
 
     def main_screen(self):
-        # Create the central widget
-        scroll = QScrollArea()
-        self.central_widget = QWidget()
-        self.main_layout = QVBoxLayout()
 
-        # Create the top layout
-        top_layout = QHBoxLayout()
-        top_layout.setContentsMargins(0, 0, 0, 0)
+        # Main widget
+        main_widget = QWidget()
+        main_layout = QVBoxLayout(main_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Create the add secret button
+        # Add secret button
         add_secret_button = QPushButton('+', self)
         add_secret_button.clicked.connect(self.add_secret_screen)
         add_secret_button.setFixedSize(30, 30)
-        top_layout.addWidget(add_secret_button, alignment=QtCore.Qt.AlignRight)
+        main_layout.addWidget(add_secret_button, alignment=QtCore.Qt.AlignRight)
+        
+        # Scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setWidgetResizable(True)
 
-
-
-        #Scroll Area Properties
-        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll.setWidgetResizable(True)
-
-        # Add the top layout to the main layout 
-        self.main_layout.addLayout(top_layout)
-
-        # Show secrets
+        # Scroll widget
+        scroll_widget = QWidget()
+        self.scroll_layout = QVBoxLayout(scroll_widget)
+        
+        # Secrets
         self.show_secrets()
 
-        # Set the layout on the central widget
-        self.central_widget.setLayout(self.main_layout)
+        # Set 
+        scroll_widget.setLayout(self.scroll_layout)
+        scroll_area.setWidget(scroll_widget)
 
-        scroll.setWidget(self.central_widget)
+        main_layout.addWidget(scroll_area)
 
-        self.setCentralWidget(scroll)
-        
+        self.setCentralWidget(main_widget)
         # Refresh the window
-        self.main_layout.update()
+
+        main_layout.update()
 
     def show_secrets(self):
         # Get the secrets
@@ -198,10 +196,10 @@ class UI(QMainWindow):
             secret_box.setLayout(secret_box_layout)
             
             # Add secret box loayout to main layout
-            self.main_layout.addWidget(secret_box)
+            self.scroll_layout.addWidget(secret_box)
 
         # Push the secret boxes up
-        self.main_layout.addStretch()
+        self.scroll_layout.addStretch()
     
     def toggle_secret(self, label, button, value):
         """
