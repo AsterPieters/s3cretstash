@@ -6,7 +6,7 @@ from modules.secrets import add_secret, get_secrets, delete_secret
 
 import sys
 from functools import partial
-from PyQt5.QtWidgets import QApplication, QMenu, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMainWindow, QFrame
+from PyQt5.QtWidgets import QApplication, QMenu, QGroupBox, QScrollArea, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMainWindow, QFrame
 from PyQt5 import QtCore
 
 
@@ -87,9 +87,9 @@ class UI(QMainWindow):
 
     def main_screen(self):
         # Create the central widget
+        scroll = QScrollArea()
         self.central_widget = QWidget()
         self.main_layout = QVBoxLayout()
-        self.setCentralWidget(self.central_widget)
 
         # Create the top layout
         top_layout = QHBoxLayout()
@@ -101,6 +101,13 @@ class UI(QMainWindow):
         add_secret_button.setFixedSize(30, 30)
         top_layout.addWidget(add_secret_button, alignment=QtCore.Qt.AlignRight)
 
+
+
+        #Scroll Area Properties
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll.setWidgetResizable(True)
+
         # Add the top layout to the main layout 
         self.main_layout.addLayout(top_layout)
 
@@ -110,6 +117,10 @@ class UI(QMainWindow):
         # Set the layout on the central widget
         self.central_widget.setLayout(self.main_layout)
 
+        scroll.setWidget(self.central_widget)
+
+        self.setCentralWidget(scroll)
+        
         # Refresh the window
         self.main_layout.update()
 
