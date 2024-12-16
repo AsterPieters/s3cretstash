@@ -2,11 +2,11 @@
 
 from modules.authentication import authenticate
 from modules.user import User
-from modules.secrets import add_secret, get_secrets
+from modules.secrets import add_secret, get_secrets, delete_secret
 
 import sys
 from functools import partial
-from PyQt5.QtWidgets import QApplication, QCheckBox, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMainWindow, QFrame
+from PyQt5.QtWidgets import QApplication, QMenu, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMainWindow, QFrame
 from PyQt5 import QtCore
 
 
@@ -144,12 +144,29 @@ class UI(QMainWindow):
                 }
             """)
 
-            # Set the layout
+            # Set the layouts
             secret_box_layout = QVBoxLayout()
+            top_secret_box_layout = QHBoxLayout()
 
             # Secret value
             secret_value = QLabel("*****")
-            secret_box_layout.addWidget(secret_value)
+            top_secret_box_layout.addWidget(secret_value)
+
+            # Push options button to the right
+            top_secret_box_layout.addStretch()
+
+            # Options button
+            options_button = QPushButton( "Options", self)
+            options_button.setFixedSize(100, 25)
+            top_secret_box_layout.addWidget(options_button, alignment=QtCore.Qt.AlignRight)
+
+            # Delete option
+            options_menu = QMenu(self)
+            options_menu.addAction("Delete", lambda name=secret_name: self._delete_secret(name))
+            options_button.setMenu(options_menu)
+
+            # Add top layout to v_layout
+            secret_box_layout.addLayout(top_secret_box_layout)
             
             # Secret line
             secret_line = QFrame(self)
@@ -163,6 +180,7 @@ class UI(QMainWindow):
                     # This is some fucking magic
                     lambda _, lbl=secret_value, btn=reveal_button, val=secret['secret_value']: self.toggle_secret(lbl, btn, val)
                     )
+            reveal_button.setFixedSize(100, 30)
             secret_box_layout.addWidget(reveal_button)
 
             # Set layout
@@ -170,8 +188,6 @@ class UI(QMainWindow):
             
             # Add secret box loayout to main layout
             self.main_layout.addWidget(secret_box)
-
-
 
         # Push the secret boxes up
         self.main_layout.addStretch()
@@ -188,6 +204,11 @@ class UI(QMainWindow):
             # Hide the secret
             label.setText("******")
             button.setText("Reveal")
+
+    def _delete_secret(self, secret_name):
+        
+        # Delete the secret
+        delete_secret(secret_name)
 
     def add_secret_screen(self):
         # Create the central widget
@@ -209,7 +230,7 @@ class UI(QMainWindow):
 
         # Add secret button
         add_secret_button = QPushButton('Add secret', self)
-        add_secret_button.clicked.connect(self.add_secret)
+        add_secret_button.clicked.connect(self._add_secret)
         self.add_secret_layout.addWidget(add_secret_button)
 
         # Set the layout on the central widget
@@ -218,9 +239,11 @@ class UI(QMainWindow):
         # Refresh the window
         self.add_secret_layout.update()
 
-    def add_secret(self):
+    def _add_secret(self):
         add_secret(self.secret_name_field.text(), self.secret_field.text(), self.user)
         self.main_screen()
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

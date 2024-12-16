@@ -25,6 +25,24 @@ def add_secret(secret_name, secret, user):
     # Create the object
     bucket.create_object(object_name, secret_data)
 
+def delete_secret(secret_name):
+    """
+    Delete secret from bucket.
+
+    Args:
+        secret_name (STR): The name of the secret.
+    """
+
+    print(secret_name)
+
+    # base64 the secret name
+    object_name = base64.b64encode(secret_name.encode('utf-8')).decode('utf-8')
+
+    bucket = MinioBucket()
+
+    # Delete the object
+    bucket.delete_object(object_name)
+
 def list_secrets():
     """
     List all secrets stored.

@@ -74,6 +74,24 @@ class MinioBucket:
         except Exception as e:
             logger.error(f"Error occured while creating object {object_name}: {e}")
 
+    def delete_object(self, object_name):
+        """
+        Delete the object from the bucket.
+
+        Args:
+            object_name (STR): The name of the object.
+        """
+
+        try:
+            # Delete the bucket
+            self.client.remove_object(self.bucket_name, object_name=object_name)
+
+            logger.info(f"Deleted object {object_name}.")
+
+        except Exception as e:
+            logger.error(f"Error occured while deleting object {object_name} {e}")
+    
+
     def get_object(self, object_name):
         """
         Get the object and read its content.
