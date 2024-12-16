@@ -162,7 +162,7 @@ class UI(QMainWindow):
 
             # Delete option
             options_menu = QMenu(self)
-            options_menu.addAction("Delete", lambda name=secret_name: self._delete_secret(name))
+            options_menu.addAction("Delete", lambda name=secret_name, box=secret_box: self._delete_secret(name, box))
             options_button.setMenu(options_menu)
 
             # Add top layout to v_layout
@@ -205,10 +205,14 @@ class UI(QMainWindow):
             label.setText("******")
             button.setText("Reveal")
 
-    def _delete_secret(self, secret_name):
+    def _delete_secret(self, secret_name, secret_box):
         
         # Delete the secret
         delete_secret(secret_name)
+
+        # Delete the box
+        secret_box.setParent(None)
+
 
     def add_secret_screen(self):
         # Create the central widget
