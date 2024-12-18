@@ -4,8 +4,9 @@ from .encryption import encrypt_secret, decrypt_secret
 from .miniobucket import MinioBucket
 
 import base64
+import json
 
-def add_secret(secret_name, secret, user):
+def add_secret(secret_name, secret, secret_description, user):
     """
     Encrypt and add secret to the bucket.
     
@@ -20,10 +21,33 @@ def add_secret(secret_name, secret, user):
     # base64 the secret_name
     object_name = base64.b64encode(secret_name.encode('utf-8')).decode('utf-8')
 
-    bucket = MinioBucket()
-    
+    # Add other data to the secret_data
+    secret_data["description"] = secret_description
+
+    # Turn secret_data into json
+    secret_data = json.dumps(secret_data)
+
     # Create the object
+    bucket = MinioBucket()
     bucket.create_object(object_name, secret_data)
+
+def delete_secret(secret_name):
+    """
+    Delete secret from bucket.
+
+    Args:
+        secret_name (STR): The name of the secret.
+    """
+
+    print(secret_name)
+
+    # base64 the secret name
+    object_name = base64.b64encode(secret_name.encode('utf-8')).decode('utf-8')
+
+    bucket = MinioBucket()
+
+    # Delete the object
+    bucket.delete_object(object_name)
 
 def list_secrets():
     """
@@ -75,10 +99,17 @@ def get_secrets(master_secret):
         # Decrypt the data
         secret_value = decrypt_secret(master_secret, secret_data)
 
+        secret_data = json.loads(secret_data)
+
+        # Get other data from the secret_data
+        # Return nothing if description is empty
+        secret_description = secret_data.get('description', "")
+
         # Create dict for secret
         secret = {
             "secret_name": secret_name,
-            "secret_value": secret_value
+            "secret_value": secret_value,
+            "secret_description": secret_description
                 }
 
         # Add dict to list
