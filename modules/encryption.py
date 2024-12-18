@@ -43,12 +43,14 @@ def encrypt_secret(master_secret, plain_text_secret):
         aesgcm = AESGCM(encryption_key)
         encrypted_secret = aesgcm.encrypt(iv, plain_text_secret.encode("utf-8"), None)
 
-        # Construct and return the JSON string
-        return json.dumps({
+        # Construct and return a dictionary
+        data = {
             "salt": base64.b64encode(salt).decode("utf-8"),
             "iv": base64.b64encode(iv).decode("utf-8"),
             "secret": base64.b64encode(encrypted_secret).decode("utf-8")
-        })
+        }
+
+        return data
 
     except Exception as e:
         raise ValueError(f"Error occured while trying to encrypt secret: {e}")
