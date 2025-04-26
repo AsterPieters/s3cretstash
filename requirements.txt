@@ -5,3 +5,5 @@ psycopg2-binary
 bcrypt
 python-jose
 passlib
+pydantic[email]
+cryptography

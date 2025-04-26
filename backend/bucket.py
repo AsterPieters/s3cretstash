@@ -14,7 +14,7 @@ from .models import Bucket, BucketCreate, BucketAccess
 def add_bucket(bucket, current_user, db):
     """ Add bucket to user account """
     # Check if user already has a bucket with that name
-    existing = db.query(Bucket).filter_by(user=current_user.username, name=bucket.name).first()
+    existing = db.query(Bucket).filter_by(owner_id=current_user.id, name=bucket.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Bucket with that name already exists")
     
