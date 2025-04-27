@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from . import models, database
 from .models import UserCreate
 from .user import get_current_user, register_user, login_user
-from .bucket import add_bucket
+from .bucket import add_bucket, list_buckets
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -34,4 +34,6 @@ def add_bucket_api(
     ):
     return add_bucket(bucket, current_user, db)
         
-
+@app.get("/buckets/list")
+def list_buckets_api(current_user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    return list_buckets(current_user, db)
