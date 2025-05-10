@@ -11,7 +11,7 @@ from .models import Bucket, BucketCreate, BucketAccess
 
 def list_buckets(current_user, db):
     """ List all bucket created by the user """
-    buckets = db.query(Bucket).filter_by(owner_id=current_user.id)
+    buckets = db.query(Bucket).filter_by(owner_id=current_user.id).all()
     return buckets
 
 def add_bucket(bucket, current_user, db):
