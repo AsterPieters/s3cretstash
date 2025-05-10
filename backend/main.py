@@ -5,6 +5,7 @@ from . import models, database
 from .models import UserCreate
 from .user import get_current_user, register_user, login_user
 from .bucket import add_bucket, list_buckets
+from .objectstorage import add_objectstorage, list_objectstorages
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -26,13 +27,20 @@ def login(user: UserCreate, db: Session = Depends(database.get_db)):
 def read_user_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
-@app.post("/stashes/add")
-def add_stash_api(
-    bucket: models.StashCreate,
+@app.post("/objectstorage/add")
+def add_objectstorage_api(
+    objectstorage: models.ObjectstorageCreate,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(database.get_db)
     ):
-    return add_stash(stash, current_user, db)
+    return add_objectstorage(objectstorage, current_user, db)
+
+@app.get("/objectstorage/list")
+def list_objectstorage_api(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db)
+    ):
+    return list_objectstorages(current_user, db)
 
 @app.post("/buckets/add")
 def add_bucket_api(
