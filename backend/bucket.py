@@ -1,11 +1,10 @@
 from fastapi import HTTPException
 import os
 from fastapi import HTTPException
-from minio import Minio
-from minio.error import S3Error, BucketAlreadyOwnedByYou, BucketAlreadyExists
+from minio.error import S3Error
 
 from .settings import fernet
-from .models import Bucket
+from .models import Bucket, Objectstorage
 from .objectstorage import create_client, objectstorage_exists
 
 
@@ -15,7 +14,7 @@ def list_buckets(current_user, db):
     buckets = db.query(Bucket).filter_by(owner_id=current_user.id).all()
     return buckets
 
-def add_bucket(bucket,objectspace, current_user, db):
+def add_bucket(bucket,objectstorage, current_user, db):
     """ Add bucket to objectspace """
 
     # Check if user already has a bucket with that name
@@ -24,7 +23,7 @@ def add_bucket(bucket,objectspace, current_user, db):
         raise HTTPException(status_code=400, detail="Bucket with that name already exists")
     
     # Check if objectstore exists in database
-    objectstorage = db.query(Objectspace).filter_by(name=objectstorage.name).first()
+    objectstorage = db.query(Objectstorage).filter_by(name=objectstorage.name).first()
     if not objectstorage:
         raise HTTPException(status_code=500, detail="Objectspace does not exist")
 
@@ -33,8 +32,6 @@ def add_bucket(bucket,objectspace, current_user, db):
         client = create_client(objectstorage)
         client.make_bucket(bucket.name)
 
-    except BucketAlreadyExists:
-        raise HTTPException(status_code=400, detail="Bucket already exists")
     except S3Error as e:
         raise HTTPException(status_code=500, detail=f"S3 error: {e.message}")
     except Exception as e:
