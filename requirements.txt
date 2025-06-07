@@ -8,3 +8,4 @@ passlib
 pydantic[email]
 cryptography
 minio
+python-dotenv
