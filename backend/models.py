@@ -33,4 +33,11 @@ class Secret(Base):
 
 class SecretCreate(BaseModel):
     name: str
+    type: int 
     note: str
+    content: str
+
+class SecretRemove(BaseModel):
+    name: str
+
+

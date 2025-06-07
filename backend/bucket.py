@@ -54,3 +54,11 @@ class Bucket:
             length=len(content.encode("utf-8")),
             content_type="text/plain"
         )
+
+    def remove_object(self, object_name):
+
+        self.client.remove_object(
+            self.bucket_name,
+            object_name
+        )
+

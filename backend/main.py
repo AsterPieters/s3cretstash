@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 
 from . import models, database
 from .bucket import Bucket
-from .models import SecretCreate, UserCreate
+from .models import SecretCreate, SecretRemove, UserCreate
 from .user import get_current_user, register_user, login_user
 from .logger import get_logger
-from .secret import create_secret
+from .secret import create_secret, list_secrets, remove_secret
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -36,8 +36,24 @@ def read_bucket_status(current_user: models.User = Depends(get_current_user)):
 
 @app.post("/secrets/create")
 def create_secret_(
-        current_user: models.User = Depends(get_current_user),
         secret: SecretCreate,
-        content: str
+        current_user: models.User = Depends(get_current_user),
+        db: Session = Depends(database.get_db),
         ):
-    return create_secret(secret, content)
+    return create_secret(secret, current_user, db)
+
+@app.get("/secrets/list")
+def list_secrets_(
+        current_user: models.User = Depends(get_current_user),
+        db: Session = Depends(database.get_db),
+        ):
+    return list_secrets(current_user, db)
+
+@app.post("/secrets/remove")
+def remove_secret_(
+        secret: SecretRemove,
+        current_user: models.User = Depends(get_current_user),
+        db: Session = Depends(database.get_db),
+        ):
+    return remove_secret(secret, current_user, db)
+
