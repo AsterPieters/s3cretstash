@@ -62,3 +62,13 @@ class Bucket:
             object_name
         )
 
+    def get_object(self, object_name):
+        response = self.client.get_object(
+            self.bucket_name,
+            object_name
+        )
+
+        content = response.read()
+        response.close()
+        response.release_conn()
+        return content

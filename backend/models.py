@@ -28,6 +28,7 @@ class Secret(Base):
     name = Column(String)
     type = Column(Integer, index=True)
     note = Column(String)
+    nonce = Column(String)
     s3_key = Column(String) # Formatted name to store in bucket
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
@@ -37,7 +38,6 @@ class SecretCreate(BaseModel):
     note: str
     content: str
 
-class SecretRemove(BaseModel):
+class SecretGet(BaseModel):
     name: str
-
 
