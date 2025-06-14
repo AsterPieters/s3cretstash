@@ -20,7 +20,8 @@ def register_user(user: UserCreate, db: Session):
     new_user = models.User(
         username=user.username,
         email=user.email,
-        hashed_password=auth.hash_password(user.password)
+        hashed_password=auth.hash_password(user.password),
+        role=1,
     )
     db.add(new_user)
     db.commit()
@@ -49,3 +50,4 @@ def get_current_user(token: HTTPAuthorizationCredentials = Security(security), d
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+#def assign_objectstorage(user: UserCreate, db: Session, ):

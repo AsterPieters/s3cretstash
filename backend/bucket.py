@@ -1,44 +1,74 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, Depends, Security
 import os
+from dotenv import load_dotenv
+from minio import Minio
+from minio.error import S3Error
+from urllib3 import PoolManager
+from io import BytesIO
 
-from .settings import fernet
-from .database import get_db
-from .models import Bucket, BucketCreate, BucketAccess
+from .logger import get_logger
+
+logger = get_logger()
 
 
+class Bucket:
+    def __init__(self):
+        
+        # Load the credentials from the environment variables
+        load_dotenv("bucket_credentials.env")
 
+        http_client = PoolManager(timeout=3.0) 
 
-def list_buckets(current_user, db):
-    """ List all bucket created by the user """
-    buckets = db.query(Bucket).filter_by(owner_id=current_user.id)
-    return buckets
+        self.bucket_name = os.getenv("BUCKET")
+        self.client = Minio(
+            endpoint=os.getenv("ENDPOINT_URL").replace("https://", "").replace("http://", ""),
+            access_key=os.getenv("ACCESS_KEY"),
+            secret_key=os.getenv("SECRET_KEY"),
+            secure=os.getenv("ENDPOINT_URL").startswith("https"),
+            http_client=http_client
+        )
 
-def add_bucket(bucket, current_user, db):
-    """ Add bucket to user account """
-    # Check if user already has a bucket with that name
-    existing = db.query(Bucket).filter_by(owner_id=current_user.id, name=bucket.name).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Bucket with that name already exists")
-    
-    # Generate the encryption key
-    encryption_key = os.urandom(32)
+        self.bucket_exists_()
 
-    # Encrypt the encryption key using the MASTER KEY
-    encrypted_key = fernet.encrypt(encryption_key)
+    def bucket_exists_(self):
+        try:
+            exists = self.client.bucket_exists(self.bucket_name)
+            if exists:
+                logger.info("Bucket exists")
+                return True
+            else:
+                logger.error("Bucket does not exits")
+                return False
 
-    new_bucket = Bucket(
-        name=bucket.name,
-        access_key=bucket.access_key,
-        secret_key=bucket.secret_key,
-        endpoint_url=bucket.endpoint_url,
-        encryption_key=encrypted_key,
-        owner_id=current_user.id
-    )
+        except S3Error as e:
+            logger.error(f"Bucket does not exist: {e}")
+            return False
 
-    db.add(new_bucket)
-    db.commit()
-    db.refresh(new_bucket)
+    def create_object(self, object_name, content):
+        
+        data = BytesIO(content.encode("utf-8"))
 
-    return {"message": "Bucket created"}
+        self.client.put_object(
+            self.bucket_name,
+            object_name,
+            data,
+            length=len(content.encode("utf-8")),
+            content_type="text/plain"
+        )
 
+    def remove_object(self, object_name):
+
+        self.client.remove_object(
+            self.bucket_name,
+            object_name
+        )
+
+    def get_object(self, object_name):
+        response = self.client.get_object(
+            self.bucket_name,
+            object_name
+        )
+
+        content = response.read()
+        response.close()
+        response.release_conn()
+        return content

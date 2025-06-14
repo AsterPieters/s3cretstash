@@ -7,3 +7,5 @@ python-jose
 passlib
 pydantic[email]
 cryptography
+minio
+python-dotenv
