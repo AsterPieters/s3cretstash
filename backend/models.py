@@ -21,6 +21,10 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
+class UserValidate(BaseModel):
+    email: EmailStr
+    password: str
+
 class Secret(Base):
     __tablename__ = "secret"
 

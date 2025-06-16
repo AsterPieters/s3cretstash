@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from . import models, auth
 from .auth import SECRET_KEY, ALGORITHM
-from .models import UserCreate
+from .models import UserCreate, UserValidate
 
 security = HTTPBearer()
 
@@ -28,9 +28,9 @@ def register_user(user: UserCreate, db: Session):
     db.refresh(new_user)
     return {"message": "User registered"}
 
-def login_user(user: UserCreate, db: Session):
+def login_user(user: UserValidate, db: Session):
     """ Authenticate user and generate JWT """
-    db_user = db.query(models.User).filter(models.User.username == user.username).first()
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if not db_user or not auth.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     

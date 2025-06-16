@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
 from . import models, database
 from .bucket import Bucket
-from .models import SecretCreate, UserCreate, SecretGet
+from .models import SecretCreate, UserCreate, SecretGet, UserValidate
 from .user import get_current_user, register_user, login_user
 from .logger import get_logger
 from .secret import create_secret, list_secrets, remove_secret, get_secret
@@ -14,6 +14,19 @@ app = FastAPI()
 logger = get_logger()
 bucket = Bucket()
 
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/")
 def read_root():
     return{"message": "S3cretstash backend is running"}
@@ -23,7 +36,7 @@ def register(user: UserCreate, db: Session = Depends(database.get_db)):
     return register_user(user, db)
 
 @app.post("/login")
-def login(user: UserCreate, db: Session = Depends(database.get_db)):
+def login(user: UserValidate, db: Session = Depends(database.get_db)):
     return login_user(user, db)
 
 @app.get("/users/me")

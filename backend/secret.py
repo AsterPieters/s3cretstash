@@ -18,7 +18,9 @@ bucket = Bucket()
 def create_secret(secret: SecretCreate, current_user: UserCreate, db: Session):
     """ Create secret """
     #TODO: check for duplicates
-
+    if db.query(models.Secret).filter_by(name=secret.name).first():
+        return {"message": "Secret with that name already exists"}
+    
     # Generate unique uuid
     secret_uuid = str(uuid.uuid4())
 
@@ -65,9 +67,14 @@ def create_secret(secret: SecretCreate, current_user: UserCreate, db: Session):
 
 def list_secrets(user: UserCreate, db: Session): 
     try:
-        db_secrets = db.query(models.Secret).all()
-    
-        return {"result": db_secrets}
+        db_secrets = db.query(models.Secret.name, models.Secret.type).all()
+        
+        data = []
+
+        for item in db_secrets:
+            data.append(item)
+        return {"result": data}
+
     except Exception as e:
         logger.error(f"Could not list secrets: {e}")
         return {"message": "Something went wrong trying to list secrets"}
